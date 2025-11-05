@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Donate Medicine 💚</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Donate Medicine 💊</h2>
+    <form id="donorForm" enctype="multipart/form-data">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="text" name="medicineName" placeholder="Medicine Name" required>
+      <input type="number" name="quantity" placeholder="Quantity" required>
+      <input type="date" name="expiryDate" required>
+      <input type="text" name="contactInfo" placeholder="Contact Info" required>
+      <input type="file" name="image" accept="image/*" required>
+      <button type="submit">Submit</button>
+    </form>
+    <p id="response" style="margin-top: 10px; color: green;"></p>
+  </div>
+
+  <script>
+    const form = document.getElementById("donorForm");
+    const responseEl = document.getElementById("response");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      try {
+        const res = await fetch("/add_medicine", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+        responseEl.textContent = data.message || data.error;
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        responseEl.textContent = "Error uploading medicine!";
+      }
+    });
+  </script>
+</body>
+</html>

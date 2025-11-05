@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "medicine-redistribution-92d2f",
+  "private_key_id": "8177def6e838a3f69cde79df5a0f42ecbe5f6eee",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDwARufMPujbg5o\nJiTrvrBoPHfB5TFQ6WHf5pNrWqdYOz8Iv2pFQMZR18C9kbRLccS+00vDER5cwOeI\nq6bcbLl5FEHhaBiVQVTKiYk7a6Cgb26bLn0uQY5CdrjQqQkbvR1vBBNo7d3W+9Xd\nPL+Gpdfc7nAoivYMxo72etFMXwoWIz9LsHGEYUvme0JNT8e4HnVgwpzJQlLqx4J5\nPdClVTsND60+ZIITFxkYrEWqirTP8ptka2TOVfVFsij+RJ4bZBheO8QN3HLDdxP+\nWN9h5HGfJZ/6AgHFswdashihoBex1lLRrg4YpeiDFZGvkxzGwugajpmWhteM6g7i\nu869VT0PAgMBAAECggEAEUGDIub6sL1w+7wCW5DSTixKz/4SlaayCs8hOk7CSW25\nEn/wvBn0KF5C1V5sgCAl7TJz+Ap7DGAyRXlR/fczPqleMz6wxcp0tjs9SrBqVB6u\n7Slihrjf6ZdvolEE/qGSRDEe1CSGFrb0oXuEqcGyy4e5OLEFD9YW4VHjSoJqzzyF\n4bN0o203Eu+U5DT1iCPBAfkS4mzJgu66AZhCOW9S2OvKacwUIgJCiKNdEOPSI3Yk\nR3HCfMRKZlsK5/0AymLdk1THQAGmS4sglJeCcKoIOgUoxzuCem/uax2aq5SL1jNc\npuqUPPl+plwlzI/7DJYqHGlvvXct66aKsxRV8YMwQQKBgQD9F4xC8kH2/sndyQ2Z\n+5zjjYWPDQFFOIyFIXgkqUbjL0ei7X1K4EqEKxouFxLp0r6wGEQYAoXZrKukTm8M\n3LofW822W/PeXm5l7W2DxpN1S+TGgy7fI+5rWsKu988LlDAjwGdvoyH1l2GJteSj\nLxhGc/JR7Tmy6Rc4WDXtFButNQKBgQDywxBHZ9yyV+bctGcHNiJSfe/b/zSre+Nc\nE2lSW5d0ifiJy41bz8opamzWlZfKl+rqH+1jeir95hhFEMNFN4LbjWKc3VK5Dnba\nagO//3lbuYjYynnxMe+XfOQ7hxae34o2VR7lVCv0qspn/bbBDyANvCZErbTWQHwA\nLZBB1Q+9swKBgQDO8nZKN3Ug1e2SYFey1T7QAmR3OBcV1stwAJIQyCmikoJtAuw0\nUXoc4HGjxlI8x4oMy4rCZy2zc7FVxJyhU8sM4TAwMLgT1/tFdQLbgYAJpWkHuTSW\nWPcW6TvPfenaee1zDlyFuEqIWqPyyryNgnDDCwPVYbiQRnAqLlbJ6GtJEQKBgGpG\n8VKBasH874nBxLUIgwAgOCjU0iccxo1hxiMTC/wuBsu0fD8sebGl8N4EgX5lAafb\nsF5zdmzPFeLukr4zrisV+4z266cuaOP3s4qTenqof/uAsN/h36UvPO++lS2aaXSd\n0TfOoKutNY1PKnnceEjrDMnWTivZ8S9Wwye+8fQ3AoGBANgJ1Q5E2TiIYHnTRtFY\n6UaFQ7zwSXWjSX51gq41EsCOOJZeGK5rohwvrZNQD6+ViJTjJOsntrXPc70Eo8Jv\nZpBSPtCNpqwLsEeIHIJoT/xYZVEVnCWkI8ea2CzmKti60eDYJG5ha2XfMociJUqt\nUgBHCmG+dBSXaCWfUgpfoRw7\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@medicine-redistribution-92d2f.iam.gserviceaccount.com",
+  "client_id": "116233716161478150162",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40medicine-redistribution-92d2f.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

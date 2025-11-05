@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Receive Medicine</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Search Available Medicines 🔍</h2>
+    <input type="text" id="query" placeholder="Enter medicine name">
+    <button id="searchBtn">Search</button>
+    <div id="result"></div>
+
+    <script>
+      document.getElementById("searchBtn").addEventListener("click", async () => {
+        const query = document.getElementById("query").value;
+        const res = await fetch(`/search_medicine?query=${query}`);
+        const data = await res.json();
+        const result = document.getElementById("result");
+        if (data.error) {
+          result.innerHTML = `<p>${data.error}</p>`;
+        } else {
+          result.innerHTML = `
+            <h3>${data.medicineName}</h3>
+            <p>Quantity: ${data.quantity}</p>
+            <p>Expiry: ${data.expiryDate}</p>
+            <p>Contact: ${data.contactInfo}</p>
+            <img src="data:image/png;base64,${data.imageBase64}" alt="Medicine Image" width="150">
+          `;
+        }
+      });
+    </script>
+  </div>
+</body>
+</html>
