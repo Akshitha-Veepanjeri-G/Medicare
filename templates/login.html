@@ -2,17 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Login - MediCare</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to MediCare 💊</title>
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <div class="container">
-    <h1>Welcome to MediCare 💊</h1>
-    <form action="/login" method="POST">
-      <input type="text" name="username" placeholder="Enter your name" required>
-      <input type="email" name="email" placeholder="Enter your email" required>
-      <button type="submit">Continue</button>
+    <div style="font-size: 3rem; margin-bottom: 12px;" class="floating-icon">💊</div>
+    <h1>Welcome to MediCare</h1>
+    <p class="subtitle">Connecting medicine donors with those in need. Simple, fast, and transparent.</p>
+    
+    <form action="/login" method="POST" id="loginForm">
+      <div class="form-group">
+        <div class="input-icon-wrapper">
+          <input type="text" name="username" placeholder="Enter your full name" required autocomplete="name">
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <div class="input-icon-wrapper">
+          <input type="email" name="email" placeholder="Enter your email address" required autocomplete="email">
+          <i class="fa-solid fa-envelope"></i>
+        </div>
+      </div>
+      
+      <button type="submit" class="btn" id="submitBtn">
+        <span>Get Started</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
     </form>
   </div>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+      const btn = document.getElementById("submitBtn");
+      btn.style.opacity = "0.85";
+      btn.innerHTML = '<span class="spinner"></span> <span>Logging in...</span>';
+    });
+  </script>
 </body>
 </html>

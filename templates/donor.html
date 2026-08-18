@@ -2,30 +2,189 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Donate Medicine 💚</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donate Medicine 💚 - MediCare</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <div class="container">
-    <h2>Donate Medicine 💊</h2>
-    <form id="donorForm" enctype="multipart/form-data">
-      <input type="text" name="name" placeholder="Your Name" required>
-      <input type="text" name="medicineName" placeholder="Medicine Name" required>
-      <input type="number" name="quantity" placeholder="Quantity" required>
-      <input type="date" name="expiryDate" required>
-      <input type="text" name="contactInfo" placeholder="Contact Info" required>
-      <input type="file" name="image" accept="image/*" required>
-      <button type="submit">Submit</button>
-    </form>
-    <p id="response" style="margin-top: 10px; color: green;"></p>
+  <div class="navbar">
+    <a href="/" class="brand">
+      <i class="fa-solid fa-heart-pulse"></i>
+      MediCare
+    </a>
+    <a href="javascript:history.back()" class="nav-back">
+      <i class="fa-solid fa-chevron-left"></i> Back
+    </a>
   </div>
 
+  <div class="container">
+    <h2>Donate Medicine 💊</h2>
+    <p class="subtitle">Please fill in the details of the medicine you wish to donate.</p>
+
+    <form id="donorForm" enctype="multipart/form-data">
+      <div class="form-group">
+        <div class="input-icon-wrapper">
+          <input type="text" name="name" placeholder="Your Full Name" required>
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="input-icon-wrapper">
+          <input type="text" name="medicineName" placeholder="Medicine Name (e.g. Paracetamol 500mg)" required>
+          <i class="fa-solid fa-pills"></i>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <div class="input-icon-wrapper">
+            <input type="number" name="quantity" placeholder="Quantity / Strips" min="1" required>
+            <i class="fa-solid fa-boxes-stacked"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="input-icon-wrapper">
+            <input type="date" name="expiryDate" id="expiryDateInput" required>
+            <i class="fa-solid fa-calendar-days"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="input-icon-wrapper">
+          <input type="text" name="contactInfo" placeholder="Phone Number / Email for pickup" required>
+          <i class="fa-solid fa-address-book"></i>
+        </div>
+      </div>
+
+      <!-- Drag & Drop Upload Zone -->
+      <div class="form-group">
+        <div class="dropzone" id="dropzone">
+          <i class="fa-solid fa-cloud-arrow-up dropzone-icon"></i>
+          <p>Drag & drop medicine photo here or <span>Browse</span></p>
+          <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">PNG, JPG, JPEG up to 5MB</p>
+          <input type="file" name="image" id="fileInput" accept="image/*" required>
+        </div>
+
+        <div class="file-preview" id="filePreview">
+          <div class="file-info">
+            <img id="previewImg" src="" alt="Preview">
+            <div>
+              <div class="file-name" id="fileName">image.jpg</div>
+              <div style="font-size: 0.75rem; color: #64748b;" id="fileSize">0 KB</div>
+            </div>
+          </div>
+          <button type="button" class="remove-file" id="removeFileBtn" title="Remove file">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn" id="submitBtn">
+        <i class="fa-solid fa-paper-plane"></i>
+        <span>Submit Donation</span>
+      </button>
+    </form>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
   <script>
+    // Set minimum expiry date to today
+    const expiryInput = document.getElementById("expiryDateInput");
+    const today = new Date().toISOString().split("T")[0];
+    expiryInput.min = today;
+
+    // Drag & Drop Preview logic
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("fileInput");
+    const filePreview = document.getElementById("filePreview");
+    const previewImg = document.getElementById("previewImg");
+    const fileName = document.getElementById("fileName");
+    const fileSize = document.getElementById("fileSize");
+    const removeFileBtn = document.getElementById("removeFileBtn");
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+      });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        handleFileSelect(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (fileInput.files.length) {
+        handleFileSelect(fileInput.files[0]);
+      }
+    });
+
+    function handleFileSelect(file) {
+      if (!file.type.startsWith('image/')) {
+        showToast('Please select a valid image file', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewImg.src = e.target.result;
+        fileName.textContent = file.name;
+        fileSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
+        filePreview.style.display = 'flex';
+        dropzone.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    removeFileBtn.addEventListener('click', () => {
+      fileInput.value = '';
+      filePreview.style.display = 'none';
+      dropzone.style.display = 'block';
+    });
+
+    // Toast Alert Helper
+    function showToast(message, type = 'success') {
+      const toastContainer = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i>
+        <span>${message}</span>
+      `;
+      toastContainer.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // Form Submission
     const form = document.getElementById("donorForm");
-    const responseEl = document.getElementById("response");
+    const submitBtn = document.getElementById("submitBtn");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span> <span>Uploading donation...</span>';
+
       const formData = new FormData(form);
 
       try {
@@ -35,11 +194,20 @@
         });
 
         const data = await res.json();
-        responseEl.textContent = data.message || data.error;
-        form.reset();
+
+        if (res.ok) {
+          showToast(data.message || "Medicine added successfully!", "success");
+          form.reset();
+          removeFileBtn.click();
+        } else {
+          showToast(data.error || "Failed to upload medicine", "error");
+        }
       } catch (err) {
         console.error(err);
-        responseEl.textContent = "Error uploading medicine!";
+        showToast("Error connecting to server!", "error");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
       }
     });
   </script>

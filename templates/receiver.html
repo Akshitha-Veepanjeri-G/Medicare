@@ -2,35 +2,254 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Receive Medicine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Receive Medicine 🔍 - MediCare</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/static/style.css">
+  <style>
+    /* Image Lightbox Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-content {
+      max-width: 90%;
+      max-height: 85vh;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      object-fit: contain;
+    }
+    .modal-close {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      color: #ffffff;
+      font-size: 2rem;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Search Available Medicines 🔍</h2>
-    <input type="text" id="query" placeholder="Enter medicine name">
-    <button id="searchBtn">Search</button>
-    <div id="result"></div>
-
-    <script>
-      document.getElementById("searchBtn").addEventListener("click", async () => {
-        const query = document.getElementById("query").value;
-        const res = await fetch(`/search_medicine?query=${query}`);
-        const data = await res.json();
-        const result = document.getElementById("result");
-        if (data.error) {
-          result.innerHTML = `<p>${data.error}</p>`;
-        } else {
-          result.innerHTML = `
-            <h3>${data.medicineName}</h3>
-            <p>Quantity: ${data.quantity}</p>
-            <p>Expiry: ${data.expiryDate}</p>
-            <p>Contact: ${data.contactInfo}</p>
-            <img src="data:image/png;base64,${data.imageBase64}" alt="Medicine Image" width="150">
-          `;
-        }
-      });
-    </script>
+  <div class="navbar">
+    <a href="/" class="brand">
+      <i class="fa-solid fa-heart-pulse"></i>
+      MediCare
+    </a>
+    <a href="javascript:history.back()" class="nav-back">
+      <i class="fa-solid fa-chevron-left"></i> Back
+    </a>
   </div>
+
+  <div class="container wide">
+    <h2>Search Available Medicines 🔍</h2>
+    <p class="subtitle">Find free donated medicines nearby. Search by medicine name or browse available listings.</p>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+      <div class="search-input-wrapper">
+        <input type="text" id="query" placeholder="Type medicine name (e.g. Paracetamol, Amoxicillin)..." autocomplete="off">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
+      <button id="searchBtn" class="btn" style="width: auto;">
+        <i class="fa-solid fa-search"></i>
+        <span>Search</span>
+      </button>
+    </div>
+
+    <!-- Results Area -->
+    <div id="loading" style="display: none; margin: 40px 0;">
+      <div class="spinner" style="width: 36px; height: 36px; border-width: 4px;"></div>
+      <p style="margin-top: 12px; color: var(--text-muted); font-weight: 600;">Searching medicines...</p>
+    </div>
+
+    <div class="results-grid" id="resultsGrid"></div>
+  </div>
+
+  <!-- Image Lightbox Modal -->
+  <div class="modal" id="imageModal">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <img class="modal-content" id="modalImg" alt="Medicine Zoom">
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    const queryInput = document.getElementById("query");
+    const searchBtn = document.getElementById("searchBtn");
+    const resultsGrid = document.getElementById("resultsGrid");
+    const loadingEl = document.getElementById("loading");
+
+    // Modal
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImg");
+    const modalClose = document.getElementById("modalClose");
+
+    modalClose.addEventListener("click", () => modal.style.display = "none");
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.style.display = "none";
+    });
+
+    function openModal(imgSrc) {
+      modalImg.src = imgSrc;
+      modal.style.display = "flex";
+    }
+
+    // Toast alert
+    function showToast(message, type = 'success') {
+      const toastContainer = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i>
+        <span>${message}</span>
+      `;
+      toastContainer.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // Fetch and render medicines
+    async function searchMedicines(query = '') {
+      loadingEl.style.display = "block";
+      resultsGrid.innerHTML = "";
+
+      try {
+        const res = await fetch(`/search_medicine?query=${encodeURIComponent(query)}`);
+        const data = await res.json();
+
+        if (res.status === 404 || data.error) {
+          resultsGrid.innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+              <i class="fa-solid fa-box-open"></i>
+              <h3>No Medicines Found</h3>
+              <p>${data.error || 'No matching medicines available at this time.'}</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Handle both list format and single object format gracefully
+        const list = Array.isArray(data.results) ? data.results : (Array.isArray(data) ? data : [data]);
+
+        if (list.length === 0) {
+          resultsGrid.innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+              <i class="fa-solid fa-box-open"></i>
+              <h3>No Medicines Found</h3>
+              <p>Try searching for a different medicine name.</p>
+            </div>
+          `;
+          return;
+        }
+
+        const today = new Date();
+
+        list.forEach(med => {
+          const card = document.createElement('div');
+          card.className = 'medicine-card';
+
+          // Expiry status calculation
+          let expiryBadge = '<span class="expiry-tag valid"><i class="fa-solid fa-check"></i> Valid</span>';
+          if (med.expiryDate) {
+            const expDate = new Date(med.expiryDate);
+            const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+            if (diffDays < 0) {
+              expiryBadge = '<span class="expiry-tag warning" style="background:#fee2e2; color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Expired</span>';
+            } else if (diffDays <= 30) {
+              expiryBadge = '<span class="expiry-tag warning"><i class="fa-solid fa-clock"></i> Expires Soon</span>';
+            }
+          }
+
+          const imgSrc = med.imageBase64 ? `data:image/png;base64,${med.imageBase64}` : 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500';
+
+          card.innerHTML = `
+            <div class="medicine-img-wrapper" onclick="openModal('${imgSrc}')">
+              <img src="${imgSrc}" alt="${med.medicineName}">
+              <div class="medicine-badge"><i class="fa-solid fa-box"></i> Qty: ${med.quantity}</div>
+            </div>
+            <div class="medicine-body">
+              <div class="medicine-name">${med.medicineName}</div>
+              <div class="medicine-meta">
+                <div class="medicine-meta-item">
+                  <i class="fa-solid fa-user-heart"></i>
+                  <span>Donor: ${med.name || 'Anonymous'}</span>
+                </div>
+                <div class="medicine-meta-item">
+                  <i class="fa-solid fa-calendar-alt"></i>
+                  <span>Expiry: ${med.expiryDate || 'N/A'}</span> ${expiryBadge}
+                </div>
+              </div>
+              <button class="copy-btn" onclick="copyContact('${med.contactInfo}', this)">
+                <i class="fa-solid fa-copy"></i>
+                <span>Copy Contact: ${med.contactInfo}</span>
+              </button>
+            </div>
+          `;
+          resultsGrid.appendChild(card);
+        });
+
+      } catch (err) {
+        console.error(err);
+        resultsGrid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <i class="fa-solid fa-wifi"></i>
+            <h3>Connection Error</h3>
+            <p>Could not load medicines from server.</p>
+          </div>
+        `;
+      } finally {
+        loadingEl.style.display = "none";
+      }
+    }
+
+    function copyContact(contact, btn) {
+      navigator.clipboard.writeText(contact).then(() => {
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = `<i class="fa-solid fa-check" style="color:#10b981;"></i> <span style="color:#10b981;">Copied!</span>`;
+        showToast('Contact info copied to clipboard!', 'success');
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+        }, 2000);
+      });
+    }
+
+    // Event listeners
+    searchBtn.addEventListener("click", () => {
+      searchMedicines(queryInput.value.trim());
+    });
+
+    let debounceTimer;
+    queryInput.addEventListener("input", () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        searchMedicines(queryInput.value.trim());
+      }, 400);
+    });
+
+    queryInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        searchMedicines(queryInput.value.trim());
+      }
+    });
+
+    // Load initial list on page load
+    searchMedicines();
+  </script>
 </body>
 </html>

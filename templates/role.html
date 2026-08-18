@@ -2,16 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Select Role</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Your Role - MediCare</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+  <div class="navbar">
+    <a href="/" class="brand">
+      <i class="fa-solid fa-heart-pulse"></i>
+      MediCare
+    </a>
+    <span class="nav-back" style="pointer-events: none;">
+      <i class="fa-solid fa-user-circle"></i>
+      {{ username if username else 'Guest' }}
+    </span>
+  </div>
+
   <div class="container">
-    <h2>Hello {{ username }} 👋</h2>
-    <p>Select your role:</p>
-    <div class="buttons">
-      <a href="/donor" class="btn">Donor</a>
-      <a href="/receiver" class="btn">Receiver</a>
+    <h2>Hello, {{ username if username else 'Friend' }}! 👋</h2>
+    <p class="subtitle">What would you like to do today? Choose a path below to get started.</p>
+    
+    <div class="role-cards">
+      <a href="/donor" class="role-card donor">
+        <div class="role-icon">
+          <i class="fa-solid fa-hand-holding-medical"></i>
+        </div>
+        <h3>Donate Medicine</h3>
+        <p>Upload spare or unexpired medicines to help patients in need near you.</p>
+        <span style="font-size: 0.85rem; font-weight: 700; color: #10b981; margin-top: auto;">
+          Start Donation <i class="fa-solid fa-arrow-right"></i>
+        </span>
+      </a>
+
+      <a href="/receiver" class="role-card receiver">
+        <div class="role-icon">
+          <i class="fa-solid fa-prescription-bottle-medical"></i>
+        </div>
+        <h3>Receive Medicine</h3>
+        <p>Search available donated medicines, view stock details, and connect with donors.</p>
+        <span style="font-size: 0.85rem; font-weight: 700; color: #3b82f6; margin-top: auto;">
+          Find Medicine <i class="fa-solid fa-arrow-right"></i>
+        </span>
+      </a>
     </div>
   </div>
 </body>

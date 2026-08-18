@@ -1,6 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_cors import CORS
-from rapidfuzz import process, fuzz
+try:
+    from rapidfuzz import process, fuzz
+    HAS_RAPIDFUZZ = True
+except ImportError:
+    HAS_RAPIDFUZZ = False
+    import difflib
 from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -75,20 +80,46 @@ def add_medicine():
 
 @app.route("/search_medicine", methods=["GET"])
 def search_medicine():
-    query = request.args.get("query", "")
+    query = request.args.get("query", "").strip()
     meds = db.collection("medicines").stream()
     all_meds = [medicine_dict(doc) for doc in meds]
 
     if not all_meds:
-        return jsonify({"error": "No medicines available"}), 404
+        return jsonify({"error": "No medicines currently registered in the system."}), 404
 
-    names = [m["medicineName"] for m in all_meds]
-    match, score, idx = process.extractOne(query, names, scorer=fuzz.token_sort_ratio)
+    if not query:
+        return jsonify({"results": all_meds})
 
-    if score >= 60:
-        return jsonify(all_meds[idx])
+    # Substring search first
+    results = []
+    matched_indices = set()
+    for idx, m in enumerate(all_meds):
+        m_name = m.get("medicineName", "").lower()
+        if query.lower() in m_name:
+            results.append(m)
+            matched_indices.add(idx)
+
+    # Rapidfuzz fallback for typos
+    if not results:
+        names = [m["medicineName"] for m in all_meds]
+        if HAS_RAPIDFUZZ:
+            matches = process.extract(query, names, scorer=fuzz.token_sort_ratio, limit=5)
+            for match_tuple in matches:
+                choice, score, idx = match_tuple[0], match_tuple[1], match_tuple[2]
+                if score >= 50 and idx not in matched_indices:
+                    results.append(all_meds[idx])
+        else:
+            close_matches = difflib.get_close_matches(query, names, n=5, cutoff=0.4)
+            for cm in close_matches:
+                for idx, m in enumerate(all_meds):
+                    if m["medicineName"] == cm and idx not in matched_indices:
+                        results.append(m)
+                        matched_indices.add(idx)
+
+    if results:
+        return jsonify({"results": results})
     else:
-        return jsonify({"error": "No matching medicine found"}), 404
+        return jsonify({"error": f"No medicines found matching '{query}'"}), 404
 
 if __name__ == "__main__":
     app.run(debug=True)
